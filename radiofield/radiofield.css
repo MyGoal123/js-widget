@@ -1,0 +1,31 @@
+.radio_unselect{
+   cursor:pointer;
+   background:url(imgs/rb0.png);
+}
+.radio_unselect_disable{
+   cursor:pointer;
+   background:url(imgs/rbx.png) no-repeat;
+}
+.radio_select{
+   cursor:pointer;
+   background:url(imgs/rb1.png);
+}
+
+.radio_readonly_gl{
+    background:url(../imgs/kpi_gl.gif);
+}
+.radio_readonly_gm{
+    background:url(../imgs/kpi_gm.gif);
+}
+.radio_readonly_gr{
+    background:url(../imgs/kpi_gr.gif);
+}
+.radio_readonly_rl{
+    background:url(../imgs/kpi_rl.gif);
+}
+.radio_readonly_rm{
+    background:url(../imgs/kpi_rm.gif);
+}
+.radio_readonly_rr{
+    background:url(../imgs/kpi_rr.gif);
+}
