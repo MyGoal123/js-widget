@@ -1,31 +1,32 @@
-(function($){
+ï»¿(function($){
 	
 	var d_t_imag_path ="imgs/d_t.gif";
 	
-	//radiofieldÈë¿Ú µ÷ÓÃÊ±ÓĞÁ½ÖÖ·½Ê½
+	//radiofieldå…¥å£ è°ƒç”¨æ—¶æœ‰ä¸¤ç§æ–¹å¼
 	$.fn.radiofield = function(){
 		var method = arguments[0];
 		var methods = $.fn.radiofield.methods
-		if(methodd[method]){
-			method = methods;
+		if(methods[method]){
+			method = methods[method];
 			arguments = Array.prototype.slice.call(arguments,1);
-		}else if(method typeof 'object' || !method){
+		}else if(typeof(method) =='object' || !method){
 			method = methods.init;
 		}else {
 			return this;
 		}
-		return method.apply(this,arguments);
+		return method.apply(this, arguments);
 	};
 	/*
-		²ÎÊıÉèÖÃ
-		optionList Ñ¡ÏîÁĞ±íÊı×éÀïÃæÊÇ¶ÔÏóÖ÷Òª°üÀ¨Èı¸ö²ÎÊı [{"value":"","text":"","tip":""}]
+		å‚æ•°è®¾ç½®
+		optionList é€‰é¡¹åˆ—è¡¨æ•°ç»„é‡Œé¢æ˜¯å¯¹è±¡ä¸»è¦åŒ…æ‹¬ä¸‰ä¸ªå‚æ•° [{"value":"","text":"","tip":""}]
 		valueField:"value",
 		textField:"text",
-		textFieldTip:"tip",ÌáÊ¾
-		modeType:"1",Ä£Ê½ Ö»ÒªÓĞ¿É±à¼­£¬Ö»¶ÁÄ£Ê½
-		newline:true,ÊÇ·ñ»»ĞĞÏÔÊ¾
-		selected:null,Ñ¡ÖĞÄÄÒ»¸ö¸ù¾İvalueµÄÖµÈ¡È·¶¨
-		onChange:null,Ñ¡Ïî¸Ä±äºóÒª×öµÄ²Ù×÷
+		textFieldTip:"tip",æç¤º
+		canSelected:"canSelected" æ˜¯å¦å¯é€‰ 1ï¼šå¯é€‰, 0:ä¸å¯é€‰,
+		modeType:"1",æ¨¡å¼ åªè¦æœ‰å¯ç¼–è¾‘ï¼Œåªè¯»æ¨¡å¼
+		newline:true,æ˜¯å¦æ¢è¡Œæ˜¾ç¤º
+		selected:null,é€‰ä¸­å“ªä¸€ä¸ªæ ¹æ®valueçš„å€¼å–ç¡®å®š
+		onChange:null,é€‰é¡¹æ”¹å˜åè¦åšçš„æ“ä½œ
 	
 	*/
 	$.fn.radiofield.defaultSetting = {
@@ -33,9 +34,10 @@
 		valueField:"value",
 		textField:"text",
 		textFieldTip:"tip",
-		canSelected:"canSelected";
+		canSelected:"canSelected",
 		modeType:"1",
-		newline:true,
+		isHorizontal:false,
+		distance:"10px",
 		selected:null,
 		onChange:null,
 		
@@ -53,18 +55,23 @@
 				
 				_this.data('params',settings);
 				var modeType = settings['modeType'];
+				var isHorizontal = settings['isHorizontal'];
 				if(modeType == 1){
-					$.fn.radiofield("drawRadiofieldEditLayout");
-				}else if (modeType == 0 || modeType == 2 || modeType == 3){
-					$.fn.radiofield("drawRadiofieldReadOnlyLayout");
+					if(isHorizontal){
+						_this.radiofield("drawRadiofieldEditHorizontalLayout");
+					}else{
+						_this.radiofield("drawRadiofieldEditVerticalLayout");
+					}
+					
+				}else if (modeType == 0){
+					_this.radiofield("drawRadiofieldReadOnlyLayout");
 				}
 				
 			});
 		},
 		
-		drawRadiofieldReadOnlyLayout: function(){},
-		
-		drawRadiofieldEditLayout: function(){
+		//EditVerticalLayout
+		drawRadiofieldEditVerticalLayout: function(){
 			var _this = $(this);
 			var params = _this.data('params');
 			var optionList = params['optionList'];
@@ -74,53 +81,229 @@
 			var canSelected = params['canSelected'];
 			var selected = params['selected'];
 			var newline = params['newline'];
-			var dropHtml = [];
+			var distance = params['distance'];
 			
-			dropHtml.push('<table cellspacing="0" cellpadding="0" border="0" align="left">');
+			var drawHtmlTable = $('<table cellspacing="0" cellpadding="0" border="0" align="left" />');
+			
 			for(var i = 0; i < optionList.length; i++){
 				var option = optionList[i]
 				var id = option[valueField];
 				var text = option[textField];
 				var textTip = option[textFieldTip]
-				var canSelected = option[canSelected];
-				dropHtml.push('<tr id="radio_selected">');
-				if(canSelected == 1){
+				var canValue = option[canSelected];
+				var drawHtmlTr = $('<tr/>');
+				var drawHtmlTdImg = null;
+				var drawHtmlTdText = null;
+				var drawHtmlTdTip = null;
+				var imgClass = "";
+				var tdClass = "";
+				if(canValue == 1){
 					if(selected == id ){
-						dropHtml.push('<td valign="middle" class="radio_'+id+'"><img width="14" height="14" src="'+d_t_imag_path+'" class="radio_select" ></td>');
+						imgClass="radio_select";
 					}else{
-						dropHtml.push('<td valign="middle" class="radio_'+id+'"><img width="14" height="14" src="'+d_t_imag_path+'" class="radio_unselect" ></td>');
+						imgClass="radio_unselect";
 					}
+					tdClass = "can_select_radio";
+					drawHtmlTdText = $('<td valign="middle" nowrap="" class="can_select_radio"><a class="HL_Arial_13_grey_nul" href="javascript:void(0)">'+text+'</a></td>');
 				}else {
-					dropHtml.push('<td valign="middle" class="radio_'+id+'"><img width="14" height="14" src="'+d_t_imag_path+'" class="radio_unselect_disable" ></td>');
-				}
-				dropHtml.push('<td valign="middle"><img width="5px" height="3" src="'+d_t_imag_path+'"/></td>');
-				if(textTip){
-					dropHtml.push('<td valign="middle" nowrap=""><a class="HL_Arial_13_grey_nul" href="javascript:void(0)">'+text+'</a></td>');
-					dropHtml.push('<td width="5" height="10" nowrap = "nowrap"></td>');
-					dropHtml.push('<td nowrap="nowrap"><img id="showTip" width="10" height="14" src="/resources/components/smartform/../d_t.gif" class="smartform_icon_info" style="cursor: pointer;background: url(/resources/graphics/icon_info.png) no-repeat;"></td>');
-				}else{
-					dropHtml.push('<td valign="middle" nowrap=""><a class="HL_Arial_13_grey_nul" href="javascript:void(0)">'+text+'</a></td>');
+					imgClass = "radio_unselect_disable";
+					drawHtmlTdText = $('<td valign="middle" nowrap="" class="Arial_13_grey_lightA">'+text+'</td>');
 				}
 				
-				dropHtml.push('</tr>');
+				drawHtmlTdImg = $('<td valign="middle" class="'+tdClass+' radio_'+id+'"><img width="14" height="14" src="'+d_t_imag_path+'" class="'+imgClass+'" ></td>');
+				drawHtmlTdImg.data("value",id);
+				drawHtmlTdText.data('value',id);
+				drawHtmlTr.append(drawHtmlTdImg);
+				drawHtmlTr.append('<td valign="middle"><img width="5px" height="3" src="'+d_t_imag_path+'"/></td>');
+				
+				if(textTip){
+					drawHtmlTdTip = $('<td width="5" height="10" nowrap = "nowrap"></td><td nowrap="nowrap"><img class="showTip" width="10" height="14" src="imgs/d_t.gif" class="smartform_icon_info" style="cursor: pointer;background: url(imgs/icon_info.png) no-repeat;"></td>');
+					drawHtmlTdTip.find('img').data("tip",textTip);
+				}
+				
+				drawHtmlTr.append(drawHtmlTdText);
+				drawHtmlTr.append(drawHtmlTdTip);
+				drawHtmlTable.append('<tr><td colspan="10" height="'+distance+'" nowrap></td></tr>');
+				drawHtmlTable.append(drawHtmlTr);
 			}
 			
-			dropHtml.push('</table>');
+			_this.empty().append(drawHtmlTable);
+			_this.radiofield('initEvent');
+		},
+		//EditHorizontalLayout
+		drawRadiofieldEditHorizontalLayout: function(){
+			var _this = $(this);
+			var params = _this.data('params');
+			var optionList = params['optionList'];
+			var valueField = params['valueField'];
+			var textField = params['textField'];
+			var textFieldTip = params['textFieldTip'];
+			var canSelected = params['canSelected'];
+			var selected = params['selected'];
+			var newline = params['newline'];
+			var distance = params['distance'];
 			
+			var drawHtmlTable = $('<table cellspacing="0" cellpadding="0" border="0" align="left" />');
+			var drawHtmlTr = $('<tr />');
+			for(var i = 0; i < optionList.length; i++){
+				var option = optionList[i]
+				var id = option[valueField];
+				var text = option[textField];
+				var textTip = option[textFieldTip]
+				var csValue = option[canSelected];
+				var drawHtmlTdImg = null;
+				var drawHtmlTdText = null;
+				var drawHtmlTdTip = null;
+				var imgClass = "";
+				var tdClass = "";
+				if(i>0){
+					drawHtmlTr.append('<td width="'+distance+'" height="10" nowrap = "nowrap"></td>');
+				}
+				if(csValue == 1){
+					if(selected == id ){
+						imgClass = "radio_select";
+					}else{
+						imgClass = "radio_unselect";
+					}
+					tdClass = "can_select_radio";
+					drawHtmlTdText = $('<td valign="middle" nowrap="" class="can_select_radio"><a class="HL_Arial_13_grey_nul" href="javascript:void(0)">'+text+'</a></td>');
+				}else {
+					imgClass = "radio_unselect_disable";
+					drawHtmlTdText = $('<td valign="middle" nowrap="" class="Arial_13_grey_lightA">'+text+'</td>');
+				}
+				
+				drawHtmlTdImg = $('<td valign="middle" class="'+tdClass+' radio_'+id+'"><img width="14" height="14" src="'+d_t_imag_path+'" class="'+imgClass+'" ></td>');
+				drawHtmlTdImg.data("value",id);
+				drawHtmlTdText.data('value',id);
+				drawHtmlTr.append(drawHtmlTdImg);
+				drawHtmlTr.append('<td valign="middle"><img width="5px" height="3" src="'+d_t_imag_path+'"/></td>');
+				
+				if(textTip){
+					drawHtmlTdTip = $('<td width="5" height="10" nowrap = "nowrap"></td><td nowrap="nowrap"><img class="showTip" width="10" height="14" src="imgs/d_t.gif" class="smartform_icon_info" style="cursor: pointer;background: url(imgs/icon_info.png) no-repeat;"></td>');
+					drawHtmlTdTip.find('img').data("tip",textTip);
+				}
+				drawHtmlTr.append(drawHtmlTdText);
+				drawHtmlTr.append(drawHtmlTdTip);
+				
+			}
+			drawHtmlTable.append(drawHtmlTr);
+			_this.empty().append(drawHtmlTable);
+			_this.radiofield('initEvent');
 		},
 		
-		select: function(optionId){},
+		//ReadOnlyLayout
+		drawRadiofieldReadOnlyLayout: function(){
 		
-		clearSelect: function(){},
+			
 		
-		doSel: function(optionId){},
+		},
+		
+		initEvent:function(){
+			var _this = $(this);
+			_this.find('.can_select_radio').on("click",function(){
+				var v = $(this).data("value");
+				var params = _this.data('params');
+				if(params.selected != v){
+					_this.radiofield("select",v);
+				}
+			});
+			
+			_this.find('.showTip').on("click", function(o){
+				var tip = $(this);
+				var tipText = tip.data("tip");
+				tip.showTip(tipText,0,0,"200px");
+			});
+		},
+		
+		select: function(optionId){
+			return this.each(function(){
+				var _this = $(this);
+				var params = _this.data('params');
+				var modeType = params.modeType;
+				if(modeType == 0){return false;}
+				_this.radiofield("doSel",optionId);
+			});
+		
+		},
+		
+		clearSelect: function(){
+			var _this = $(this);
+			var params = _this.data('params');
+			_this.find(".radio_select").removeClass("radio_select").addClass("radio_unselect");
+			params.selected=null;
+		},
+		
+		doSel: function(optionId){
+			var _this = $(this);
+			var params = _this.data('params');
+			var sel = null;
+			if(optionId){
+				sel = optionId
+			}else {
+				sel = params.selected;
+			}
+			if(sel != null){
+				_this.find(".radio_select").removeClass("radio_select").addClass("radio_unselect")
+				.end().find(".radio_"+sel+" img").removeClass("radio_unselect").addClass("radio_select");
+				params.selected = sel;
+				var onChange = params.onChange;
+				if(onChange == null){return ;}
+				if(typeof onChange=="function"){
+				  $.proxy(onChange,_this)(sel);
+			    }else{
+				  eval("$.proxy("+onChange+",_this)(sel)");
+			    }    
+			}
+		
+		
+		},
 		
 		changeMode: function(modeType){},
 		
-		getValue:function(){}
+		getValue:function(){
+			var _this = $(this);
+			var params = _this.data('params');
+			return params.selected;
+		}
 		
 		
 	
-	}
+	};
 
+	 /**å¯¹è±¡ç»‘å®šç±»å‹çš„æ’ä»¶*/
+	$.fn.extend({
+	    showTip:function(tipInfo,leftOffset,topOffset,widthOffset){	
+	    	var tipObj=$("#tip_info_div");	
+	    	var _this=$(this).after(tipObj);	
+	    	tipObj.parent().css({"position":"relative","z-index":"99"});	    	
+	    	var left=_this.position(true).left;	
+	    	var top=0;
+	    	var width = "200px";
+	    	if(!$.support.leadingWhitespace){
+	    		left=left+tipObj.parent().width();	    		
+	    		top=-(_this.height()+3);
+	    	}else{
+	    		left=left+10;
+	    		top=-30;
+	    	}
+	    	
+	    	left =leftOffset?(left+leftOffset):left;
+	    	top =topOffset?(top+topOffset):top;
+	    	width = widthOffset ? widthOffset : width;
+	    	tipObj.find("div.tip_content").html(tipInfo).end().find("div.tip_content_div").css({"left":left,top:top,"width":width}).end().show();	    	
+	        $(document).off("click.tip").on("click.tip",function(e){	   
+	        	 var ev = e || window.event;
+                 var target = ev.target || ev.srcElement;
+                 var clickTarget=$(target); 
+                 var tipSource=tipObj.prev(); 
+	        	 if(clickTarget.closest(tipSource).length==0){
+	        	 	tipObj.parent().css({"position":"","z-index":""});
+	                tipObj.appendTo("body").hide();
+	                $(document).off("click.tip");
+	             }
+	        });
+	    }
+	});
+   
+	
 })(jQuery)

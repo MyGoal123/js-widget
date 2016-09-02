@@ -3,7 +3,6 @@
    background:url(imgs/rb0.png);
 }
 .radio_unselect_disable{
-   cursor:pointer;
    background:url(imgs/rbx.png) no-repeat;
 }
 .radio_select{

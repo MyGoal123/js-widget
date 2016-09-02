@@ -1,18 +1,42 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head lang="en">
     <meta charset="UTF-8">
 	
     <title>javaScript</title>
-    <style type="text/css">
+	<link href="common_1.css" rel="stylesheet" type="text/css"/>
+	<link href="radiofield.css" rel="stylesheet" type="text/css"/>
+	
+    <style type="text/css" >
     
     </style>
 	<script type="text/javaScript" src="jquery-1.9.1.js"></script>
     <script type="text/javaScript" src="radiofield.js"></script>
+	
 	<script type="text/javascript">
         
 		$(function(){
-		$("#radio_test").radiofield();
+		var radio = $("#radio_test").radiofield({
+			optionList:[
+			{"value":1,"text":"testradio1","canSelected":1},
+			{"value":2,"text":"testradio2","tip":"testradio2","canSelected":0},
+			{"value":3,"text":"testradio3","canSelected":1},
+			{"value":4,"text":"testradio4","canSelected":1},
+			{"value":5,"text":"testradio5","tip":"testradio5","canSelected":0},
+			{"value":6,"text":"testradio6","tip":"testradio6","canSelected":1}],
+			valueField:"value",
+			textField:"text",
+			textFieldTip:"tip",
+			canSelected:"canSelected",
+			modeType:"1",
+			isHorizontal:false,
+			distance:"10px",
+			selected:"1",
+			onChange:function(radioValue){
+				console.log("onChange:"+radioValue);
+			}
+		});
+		console.log(radio.radiofield("getValue"));
 		
 		});
     
@@ -20,6 +44,25 @@
 </head>
 <body>
 <div id="radio_test"></div>
- 
+
+
+
+
+
+<!-- tip工具条  -->
+<div  style="position:relative;width:0px;height:0px;display:none;" id="tip_info_div">
+       <div  style="width:200px;height:auto;position:absolute;z-index:99" class="tip_content_div">
+          <table cellpadding=0 cellspacing=0 border=0 width=100% >
+             <tr>
+                <td valign=top><div style="position:relative;width:11px;"><img width="11" height="22" src="imgs/popup_arrow.gif" style="position:absolute;right:-1px;"></div></td>
+                <td  width=100%>
+                   <div style="width:100%;height:auto;padding:10px;background:#1b9dd5;border:1px solid white;" class="tip_content Arial_11_white_bold">
+                      
+                   </div>
+                </td>
+             </tr>
+          </table>       
+       </div>
+</div>
 </body>
 </html>
